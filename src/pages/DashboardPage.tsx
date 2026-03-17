@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { taskService } from '../services/api';
 import { Task, DashboardStats } from '../types';
 import StatsCard from '../components/StatsCard';
-import { CheckCircle2, Clock, ListChecks, TrendingUp } from 'lucide-react';
+import { CheckCircle2, Clock, ListChecks, TrendingUp, AlertCircle } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -26,43 +26,59 @@ ChartJS.register(
 );
 
 const DashboardPage = () => {
-  const [stats, setStats] = useState<DashboardStats>({ total: 0, completed: 0, pending: 0 });
+  const [stats, setStats] = useState<DashboardStats>({ total: 0, completed: 0, pending: 0, completionRate: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchStats = async () => {
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
       const tasks = await taskService.getTasks();
       const completed = tasks.filter(t => t.status === 'completed').length;
+      const total = tasks.length;
+      
       setStats({
-        total: tasks.length,
+        total,
         completed,
-        pending: tasks.length - completed,
+        pending: total - completed,
+        completionRate: total > 0 ? Math.round((completed / total) * 100) : 0
       });
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
       setLoading(false);
-    };
-    fetchStats();
-  }, []);
-
-  const barData = {
-    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'],
-    datasets: [
-      {
-        label: 'Tarefas Concluídas',
-        data: [12, 19, 3, 5, 2, 3, 7],
-        backgroundColor: 'rgba(168, 85, 247, 0.6)',
-        borderRadius: 8,
-      },
-    ],
+    }
   };
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Dados reais para o gráfico de pizza (Doughnut)
   const doughnutData = {
     labels: ['Concluídas', 'Pendentes'],
     datasets: [
       {
         data: [stats.completed, stats.pending],
-        backgroundColor: ['rgba(168, 85, 247, 0.8)', 'rgba(168, 85, 247, 0.2)'],
-        borderColor: ['rgba(168, 85, 247, 1)', 'rgba(168, 85, 247, 0.2)'],
+        backgroundColor: ['rgba(168, 85, 247, 0.8)', 'rgba(168, 85, 247, 0.1)'],
+        borderColor: ['rgba(168, 85, 247, 1)', 'rgba(255, 255, 255, 0.05)'],
         borderWidth: 1,
+        hoverOffset: 10,
+      },
+    ],
+  };
+
+  // Mock de dados semanais (poderia ser calculado via createdAt)
+  const barData = {
+    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'],
+    datasets: [
+      {
+        label: 'Tarefas Concluídas',
+        data: [4, 7, 3, 8, 5, 2, stats.completed], // O último valor é o real de hoje
+        backgroundColor: 'rgba(168, 85, 247, 0.6)',
+        borderRadius: 8,
+        hoverBackgroundColor: 'rgba(168, 85, 247, 0.9)',
       },
     ],
   };
@@ -74,25 +90,41 @@ const DashboardPage = () => {
       legend: { display: false },
     },
     scales: {
-      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } },
-      x: { grid: { display: false }, ticks: { color: '#9ca3af' } },
+      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6b7280', font: { size: 10 } } },
+      x: { grid: { display: false }, ticks: { color: '#6b7280', font: { size: 10 } } },
     },
   };
 
   if (loading) return (
-    <div className="flex items-center justify-center h-[calc(100vh-120px)]">
-      <div className="h-10 w-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-120px)] gap-4">
+      <div className="h-12 w-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin shadow-glow"></div>
+      <p className="text-gray-500 animate-pulse font-medium">Sincronizando dados...</p>
+    </div>
+  );
+
+  if (error) return (
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-120px)] text-center p-6">
+      <AlertCircle className="text-red-500 mb-4" size={48} />
+      <h3 className="text-xl font-bold text-white mb-2">Falha ao carregar métricas</h3>
+      <p className="text-gray-400 max-w-xs">{error}</p>
+      <button onClick={fetchData} className="btn-primary mt-6">Tentar Novamente</button>
     </div>
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div>
-        <h2 className="text-2xl font-bold glow-purple">Dashboard Overview</h2>
-        <p className="text-gray-400 mt-1">Bem-vindo à sua central de gerenciamento.</p>
+    <div className="space-y-6 lg:space-y-8 animate-in fade-in duration-500 pb-10 mt-16 lg:mt-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl lg:text-3xl font-bold glow-purple">Visão Geral</h2>
+          <p className="text-gray-400 mt-1">Sua produtividade em tempo real.</p>
+        </div>
+        <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-2 rounded-2xl">
+          <TrendingUp className="text-primary-light" size={18} />
+          <span className="text-sm font-semibold text-primary-light">{stats.completionRate}% Concluído</span>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         <StatsCard
           label="Total de Tarefas"
           value={stats.total}
@@ -116,28 +148,47 @@ const DashboardPage = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-card p-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="glass-card p-6 lg:p-8 lg:col-span-2">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="font-semibold text-lg flex items-center gap-2">
-              <TrendingUp className="text-primary" size={20} />
-              Produtividade Semanal
-            </h3>
+            <div>
+              <h3 className="font-semibold text-lg">Histórico Semanal</h3>
+              <p className="text-xs text-gray-500 mt-1">Comparação de tarefas concluídas por dia</p>
+            </div>
           </div>
-          <div className="h-[300px]">
+          <div className="h-[250px] lg:h-[300px]">
             <Bar data={barData} options={chartOptions} />
           </div>
         </div>
 
-        <div className="glass-card p-8">
+        <div className="glass-card p-6 lg:p-8">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="font-semibold text-lg flex items-center gap-2">
-              <ListChecks className="text-primary" size={20} />
-              Distribuição de Tarefas
-            </h3>
+            <h3 className="font-semibold text-lg text-center w-full">Distribuição</h3>
           </div>
-          <div className="h-[300px] flex items-center justify-center">
-            <Doughnut data={doughnutData} options={{ ...chartOptions, plugins: { legend: { display: true, position: 'bottom', labels: { color: '#9ca3af' } } } }} />
+          <div className="h-[200px] lg:h-[250px] flex items-center justify-center relative">
+            <Doughnut data={doughnutData} options={{ 
+              ...chartOptions, 
+              cutout: '75%',
+              plugins: { legend: { display: false } } 
+            }} />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-3xl font-bold font-mono text-white">{stats.completionRate}%</span>
+              <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Taxa</span>
+            </div>
+          </div>
+          <div className="mt-8 space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-2 text-gray-400">
+                <span className="h-2 w-2 rounded-full bg-primary"></span> Concluídas
+              </span>
+              <span className="text-white font-mono font-bold">{stats.completed}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-2 text-gray-400">
+                <span className="h-2 w-2 rounded-full bg-white/10"></span> Pendentes
+              </span>
+              <span className="text-white font-mono font-bold">{stats.pending}</span>
+            </div>
           </div>
         </div>
       </div>

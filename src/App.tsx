@@ -24,14 +24,17 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   }, [location]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex">
       <Sidebar />
-      <Header user={user} />
-      <main className="ml-64 pt-28 p-8 min-h-screen">
-        <div className="max-w-7xl mx-auto">
-          {children}
-        </div>
-      </main>
+      <div className="flex-1 flex flex-col">
+        <Header user={user} />
+        {/* ml-0 para mobile e ml-64 para desktop (espaço da sidebar fixa) */}
+        <main className="lg:ml-64 pt-20 p-4 lg:p-8 min-h-screen overflow-x-hidden">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

@@ -1,97 +1,100 @@
 import { Task, User } from '../types';
 
-// Simulação de delay para parecer uma API real
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Mock Data inicial
-const INITIAL_TASKS: Task[] = [
-  {
-    id: '1',
-    title: 'Finalizar design do dashboard',
-    description: 'Ajustar as cores e o glow roxo nos cards.',
-    status: 'completed',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    title: 'Implementar CRUD de tarefas',
-    description: 'Conectar o frontend com o mock service.',
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    title: 'Configurar rotas do sistema',
-    description: 'Utilizar React Router para navegação.',
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-  },
-];
+const STORAGE_KEY = 'taskify_tasks';
 
 export const taskService = {
+  // Simula GET /tasks
   async getTasks(): Promise<Task[]> {
-    await delay(200);
-    const tasks = localStorage.getItem('tasks');
-    if (!tasks) {
-      localStorage.setItem('tasks', JSON.stringify(INITIAL_TASKS));
-      return INITIAL_TASKS;
+    try {
+      await delay(1200);
+      const data = localStorage.getItem(STORAGE_KEY);
+      
+      // if (Math.random() > 0.95) throw new Error("Falha ao carregar dados do servidor");
+
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error("Erro na API getTasks:", error);
+      throw new Error("Não foi possível carregar as tarefas. Tente novamente.");
     }
-    return JSON.parse(tasks);
   },
 
-  async createTask(task: Omit<Task, 'id' | 'createdAt'>): Promise<Task> {
-    await delay(200);
-    const tasks = await this.getTasks();
-    const newTask: Task = {
-      ...task,
-      id: Math.random().toString(36).substr(2, 9),
-      createdAt: new Date().toISOString(),
-    };
-    const updatedTasks = [newTask, ...tasks];
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-    return newTask;
+  // Simula POST /tasks
+  async createTask(taskData: Omit<Task, 'id' | 'createdAt'>): Promise<Task> {
+    try {
+      await delay(800);
+      const tasks = await this.getTasks();
+      
+      const newTask: Task = {
+        ...taskData,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+      };
+
+      const updatedTasks = [newTask, ...tasks];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedTasks));
+      return newTask;
+    } catch (error) {
+      console.error("Erro na API createTask:", error);
+      throw new Error("Erro ao criar tarefa. Verifique sua conexão.");
+    }
   },
 
+  // Simula PATCH /tasks/:id
   async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
-    await delay(200);
-    const tasks = await this.getTasks();
-    const taskIndex = tasks.findIndex(t => t.id === id);
-    if (taskIndex === -1) throw new Error('Tarefa não encontrada');
-    
-    const updatedTask = { ...tasks[taskIndex], ...updates };
-    tasks[taskIndex] = updatedTask;
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-    return updatedTask;
+    try {
+      await delay(500);
+      const tasks = await this.getTasks();
+      const index = tasks.findIndex(t => t.id === id);
+      
+      if (index === -1) throw new Error("Tarefa não encontrada no servidor.");
+
+      const updatedTask = { ...tasks[index], ...updates };
+      tasks[index] = updatedTask;
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      return updatedTask;
+    } catch (error) {
+      console.error("Erro na API updateTask:", error);
+      throw new Error("Erro ao atualizar tarefa.");
+    }
   },
 
+  // Simula DELETE /tasks/:id
   async deleteTask(id: string): Promise<void> {
-    await delay(200);
-    const tasks = await this.getTasks();
-    const filteredTasks = tasks.filter(t => t.id !== id);
-    localStorage.setItem('tasks', JSON.stringify(filteredTasks));
+    try {
+      await delay(600);
+      const tasks = await this.getTasks();
+      const filteredTasks = tasks.filter(t => t.id !== id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredTasks));
+    } catch (error) {
+      console.error("Erro na API deleteTask:", error);
+      throw new Error("Erro ao deletar tarefa.");
+    }
   }
 };
 
 export const authService = {
   async login(email: string): Promise<User> {
-    await delay(500);
+    await delay(1000);
     const user: User = {
-      id: '1',
+      id: 'user_1',
       name: email.split('@')[0],
       email: email,
-      avatar: `https://ui-avatars.com/api/?name=${email}&background=a855f7&color=fff`
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
     };
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('taskify_user', JSON.stringify(user));
     return user;
   },
 
   logout() {
-    localStorage.removeItem('user');
+    localStorage.removeItem('taskify_user');
     window.location.href = '/login';
   },
 
   getCurrentUser(): User | null {
-    const user = localStorage.getItem('user');
+    const user = localStorage.getItem('taskify_user');
     return user ? JSON.parse(user) : null;
   }
 };
