@@ -199,7 +199,6 @@ const DashboardPage = () => {
                 legend: { display: false },
                 tooltip: { enabled: true }
               },
-              // Removendo as escalas para limpar os números de fundo
               scales: {
                 x: { display: false },
                 y: { display: false }

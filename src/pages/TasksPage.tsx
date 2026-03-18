@@ -22,8 +22,6 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '', setGlobalS
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
 
-  // ... (restante do código até o return)
-
   const [toast, setToast] = useState<{ message: string; type: ToastType; isVisible: boolean }>({
     message: '', type: 'success', isVisible: false
   });
