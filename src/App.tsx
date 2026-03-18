@@ -50,9 +50,6 @@ const DashboardLayout = ({
   );
 };
 
-// Como o estado da Sidebar está interno ao componente Sidebar por simplicidade, 
-// vou ajustar o App para ser um pouco mais flexível com as margens.
-
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
 

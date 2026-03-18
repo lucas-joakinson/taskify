@@ -25,7 +25,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete }) => {
           : 'hover:border-primary/40 hover:shadow-glow hover:bg-surface/40'
       }`}
     >
-      {/* Glow dinâmico no hover */}
       <div className={`absolute -right-10 -top-10 h-32 w-32 rounded-full blur-[50px] transition-all duration-700 pointer-events-none ${
         isCompleted ? 'bg-primary/5' : 'bg-primary/20 opacity-0 group-hover:opacity-100'
       }`}></div>
@@ -64,7 +63,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete }) => {
         <div className="flex flex-col gap-2 ml-4 shrink-0">
           <button
             onClick={(e) => {
-              e.stopPropagation(); // Impede abertura do modal
+              e.stopPropagation();
               onToggle(task.id);
             }}
             className={`p-2.5 rounded-xl transition-all duration-300 ${
@@ -78,7 +77,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete }) => {
           </button>
           <button
             onClick={(e) => {
-              e.stopPropagation(); // Impede abertura do modal
+              e.stopPropagation();
               onDelete(task.id);
             }}
             className="p-2.5 rounded-xl bg-surface border border-white/5 text-gray-500 hover:text-red-400 hover:border-red-500/50 transition-all duration-300"

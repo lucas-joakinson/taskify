@@ -30,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const NavContent = () => (
     <div className="flex h-full flex-col p-4">
-      {/* Perfil do Usuário no Topo */}
+      {/* Perfil do Usuário */}
       <div className={`mb-8 flex items-center gap-3 p-2 rounded-2xl bg-white/5 border border-white/5 ${isCollapsed && !isMobileOpen ? 'justify-center' : ''}`}>
         <img
           src={user?.avatar}
@@ -54,20 +54,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           <h1 className="text-lg font-bold glow-purple whitespace-nowrap">Taskify</h1>
         )}
       </div>
-
-      {/* Busca dentro da Sidebar */}
-      {(!isCollapsed || isMobileOpen) && (
-        <div className="relative mb-6 px-2">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Pesquisar..."
-            className="w-full bg-background border border-white/5 rounded-xl py-2 pl-9 pr-3 text-xs focus:border-primary/50 outline-none transition-all"
-          />
-        </div>
-      )}
 
       {/* Links de Navegação */}
       <nav className="flex-1 space-y-2">
@@ -94,11 +80,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         })}
       </nav>
 
-      {/* Logout e Colapso (Desktop) lado a lado */}
-      <div className="mt-auto flex items-center gap-2">
+      {/* Logout e Colapso */}
+      <div className={`mt-auto flex gap-2 ${isCollapsed && !isMobileOpen ? 'flex-col-reverse items-center' : 'items-center flex-row'}`}>
         <button
           onClick={() => authService.logout()}
-          className={`flex-1 flex items-center gap-3 rounded-xl px-4 py-3 text-gray-400 transition-all hover:bg-red-500/10 hover:text-red-400 group ${isCollapsed && !isMobileOpen ? 'justify-center px-0' : ''}`}
+          className={`flex-1 flex items-center gap-3 rounded-xl px-4 py-3 text-gray-400 transition-all hover:bg-red-500/10 hover:text-red-400 group ${isCollapsed && !isMobileOpen ? 'justify-center px-0 w-full' : ''}`}
           title="Sair"
         >
           <LogOut size={20} />
@@ -118,7 +104,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      {/* Botão Hambúrguer Mobile */}
       <button 
         onClick={() => setIsMobileOpen(true)}
         className="fixed top-6 left-6 z-[60] lg:hidden p-3 bg-surface border border-white/10 rounded-2xl text-primary-light shadow-glow-sm"
@@ -126,12 +111,10 @@ const Sidebar: React.FC<SidebarProps> = ({
         <Menu size={24} />
       </button>
 
-      {/* Sidebar Desktop */}
       <aside className={`hidden lg:block fixed left-0 top-0 h-screen border-r border-white/5 bg-surface/20 backdrop-blur-xl z-50 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
         <NavContent />
       </aside>
 
-      {/* Sidebar Mobile (Overlay) */}
       <AnimatePresence>
         {isMobileOpen && (
           <>

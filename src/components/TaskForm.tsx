@@ -14,7 +14,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, initialD
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
-  // Sincroniza o estado com os dados iniciais quando o modal abre para edição
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title);
@@ -29,7 +28,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, initialD
     e.preventDefault();
     if (!title.trim()) return;
     onSubmit(title, description);
-    // Reset acontece no useEffect ao fechar/abrir, mas limpamos aqui também por segurança
     if (!initialData) {
       setTitle('');
       setDescription('');

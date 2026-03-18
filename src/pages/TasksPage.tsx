@@ -22,7 +22,6 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '' }) => {
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
 
-  // Toast State
   const [toast, setToast] = useState<{ message: string; type: ToastType; isVisible: boolean }>({
     message: '', type: 'success', isVisible: false
   });
@@ -76,7 +75,6 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '' }) => {
     
     const newStatus = task.status === 'completed' ? 'pending' : 'completed';
     
-    // UI Otimista
     setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
     if (selectedTask?.id === id) {
       setSelectedTask(prev => prev ? { ...prev, status: newStatus } : null);

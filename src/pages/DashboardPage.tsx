@@ -57,12 +57,10 @@ const DashboardPage = () => {
     fetchData();
   }, []);
 
-  // Cálculo do histórico semanal baseado em tarefas reais
   const weeklyData = useMemo(() => {
     const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
     const counts = new Array(7).fill(0);
-    
-    // Pega o início da semana atual (domingo)
+
     const today = new Date();
     const firstDayOfWeek = new Date(today);
     firstDayOfWeek.setDate(today.getDate() - today.getDay());
@@ -77,15 +75,12 @@ const DashboardPage = () => {
       }
     });
 
-    // Reordenar para começar de Segunda se preferir, ou manter Dom-Sab
-    // Vamos manter Seg-Dom como no gráfico original
     const labels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'];
     const data = [counts[1], counts[2], counts[3], counts[4], counts[5], counts[6], counts[0]];
     
     return { labels, data };
   }, [tasks]);
 
-  // Dados reais para o gráfico de pizza (Doughnut)
   const doughnutData = {
     labels: ['Concluídas', 'Pendentes'],
     datasets: [

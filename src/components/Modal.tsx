@@ -10,7 +10,6 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
-  // Impede o scroll do body quando o modal está aberto
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -43,7 +42,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
             className="relative w-full max-w-lg glass-card p-6 lg:p-8 border-primary/20 shadow-glow overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Decoração superior */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
             
             <div className="flex items-center justify-between mb-6">
