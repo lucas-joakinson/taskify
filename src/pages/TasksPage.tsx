@@ -8,12 +8,12 @@ import Toast, { ToastType } from '../components/Toast';
 import Modal from '../components/Modal';
 import { Plus, Filter, Search, RefreshCw, AlertCircle, Trash2, CheckCircle2, Calendar, FileText, Edit3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
 interface TasksPageProps {
   globalSearchTerm?: string;
+  setGlobalSearchTerm?: (val: string) => void;
 }
 
-const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '' }) => {
+const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '', setGlobalSearchTerm }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +21,8 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '' }) => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
+
+  // ... (restante do código até o return)
 
   const [toast, setToast] = useState<{ message: string; type: ToastType; isVisible: boolean }>({
     message: '', type: 'success', isVisible: false
@@ -136,15 +138,28 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '' }) => {
         </button>
       </div>
 
-      <div className="flex flex-col lg:flex-row items-center gap-4 bg-surface/30 p-1.5 rounded-2xl border border-white/5 backdrop-blur-sm overflow-hidden">
-        <div className="flex items-center gap-1 w-full flex-wrap sm:flex-nowrap">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Barra de Pesquisa Local */}
+        <div className="lg:col-span-2 relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+          <input
+            type="text"
+            placeholder="Buscar por título ou descrição..."
+            value={globalSearchTerm}
+            onChange={(e) => setGlobalSearchTerm?.(e.target.value)}
+            className="w-full bg-surface/30 border border-white/5 rounded-2xl py-3.5 pl-12 pr-4 text-sm focus:border-primary/50 outline-none transition-all backdrop-blur-sm"
+          />
+        </div>
+
+        {/* Filtros de Status */}
+        <div className="flex items-center gap-1 bg-surface/30 p-1 rounded-2xl border border-white/5 backdrop-blur-sm">
           {(['all', 'pending', 'completed'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`flex-1 lg:flex-none whitespace-nowrap px-6 py-2.5 rounded-xl text-xs lg:text-sm font-bold transition-all duration-300 ${
+              className={`flex-1 whitespace-nowrap py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
                 filter === f 
-                  ? 'bg-primary text-white shadow-glow border border-primary/20 scale-[1.02]' 
+                  ? 'bg-primary text-white shadow-glow border border-primary/20' 
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
             >

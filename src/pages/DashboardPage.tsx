@@ -81,6 +81,7 @@ const DashboardPage = () => {
     return { labels, data };
   }, [tasks]);
 
+
   const doughnutData = {
     labels: ['Concluídas', 'Pendentes'],
     datasets: [
@@ -191,9 +192,18 @@ const DashboardPage = () => {
           </div>
           <div className="h-[200px] lg:h-[250px] flex items-center justify-center relative">
             <Doughnut data={doughnutData} options={{ 
-              ...chartOptions, 
+              responsive: true,
+              maintainAspectRatio: false,
               cutout: '75%',
-              plugins: { legend: { display: false } } 
+              plugins: { 
+                legend: { display: false },
+                tooltip: { enabled: true }
+              },
+              // Removendo as escalas para limpar os números de fundo
+              scales: {
+                x: { display: false },
+                y: { display: false }
+              }
             }} />
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-3xl font-bold font-mono text-white">{stats.completionRate}%</span>

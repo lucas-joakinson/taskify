@@ -73,7 +73,7 @@ function App() {
           element={
             <PrivateRoute>
               <DashboardLayout searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
-                <TasksPage globalSearchTerm={searchTerm} />
+                <TasksPage globalSearchTerm={searchTerm} setGlobalSearchTerm={setSearchTerm} />
               </DashboardLayout>
             </PrivateRoute>
           }
