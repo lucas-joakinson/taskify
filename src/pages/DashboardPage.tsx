@@ -112,7 +112,7 @@ const DashboardPage = () => {
   );
 
   return (
-    <div className="space-y-6 lg:space-y-8 animate-in fade-in duration-500 pb-10 mt-16 lg:mt-0">
+    <div className="space-y-6 lg:space-y-8 animate-in fade-in duration-500 pb-10">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl lg:text-3xl font-bold glow-purple">Visão Geral</h2>
@@ -148,8 +148,8 @@ const DashboardPage = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="glass-card p-6 lg:p-8 lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="glass-card p-6 lg:p-8">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="font-semibold text-lg">Histórico Semanal</h3>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
-import Header from './components/Header';
 import DashboardPage from './pages/DashboardPage';
 import TasksPage from './pages/TasksPage';
 import LoginPage from './pages/LoginPage';
@@ -23,6 +22,7 @@ const DashboardLayout = ({
   setSearchTerm: (val: string) => void;
 }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -30,22 +30,28 @@ const DashboardLayout = ({
   }, [location]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col lg:flex-row">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header fixo com largura controlada */}
-        <Header user={user} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        
-        {/* Main com padding-top para compensar o header fixo (h-20 = 80px) */}
-        <main className="flex-1 pt-20 lg:ml-64 p-4 lg:p-8 overflow-y-auto">
-          <div className="max-w-7xl mx-auto w-full">
+    <div className="min-h-screen bg-background flex">
+      <Sidebar 
+        user={user} 
+        searchTerm={searchTerm} 
+        setSearchTerm={setSearchTerm} 
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
+      />
+      
+      <main className={`flex-1 transition-all duration-300 ${isCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
+        <div className="max-w-[1280px] mx-auto w-full p-6 lg:p-10">
+          <div className="pt-16 lg:pt-0">
             {children}
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };
+
+// Como o estado da Sidebar está interno ao componente Sidebar por simplicidade, 
+// vou ajustar o App para ser um pouco mais flexível com as margens.
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
