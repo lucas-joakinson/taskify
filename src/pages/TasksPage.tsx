@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { taskService } from '../services/api';
-import { Task } from '../types';
-import TaskCard from '../components/TaskCard';
+import { Task, TaskStatus } from '../types';
+import KanbanBoard from '../components/KanbanBoard';
 import TaskForm from '../components/TaskForm';
 import SkeletonTask from '../components/SkeletonTask';
 import Toast, { ToastType } from '../components/Toast';
 import Modal from '../components/Modal';
-import { Plus, Filter, Search, RefreshCw, AlertCircle, Trash2, CheckCircle2, Calendar, FileText, Edit3 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Search, RefreshCw, AlertCircle, Trash2, Calendar, FileText, Edit3, Layout } from 'lucide-react';
+
 interface TasksPageProps {
   globalSearchTerm?: string;
   setGlobalSearchTerm?: (val: string) => void;
@@ -20,7 +20,7 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '', setGlobalS
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
+  const [defaultStatus, setDefaultStatus] = useState<TaskStatus>('todo');
 
   const [toast, setToast] = useState<{ message: string; type: ToastType; isVisible: boolean }>({
     message: '', type: 'success', isVisible: false
@@ -48,19 +48,17 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '', setGlobalS
     fetchTasks();
   }, []);
 
-  const handleSubmitTask = async (title: string, description: string) => {
+  const handleSubmitTask = async (title: string, description: string, status: TaskStatus) => {
     try {
       if (taskToEdit) {
-        // Modo Edição
-        const updated = await taskService.updateTask(taskToEdit.id, { title, description });
+        const updated = await taskService.updateTask(taskToEdit.id, { title, description, status });
         setTasks(prev => prev.map(t => t.id === updated.id ? updated : t));
         if (selectedTask?.id === updated.id) setSelectedTask(updated);
-        showToast("Tarefa atualizada com sucesso!");
+        showToast("Tarefa atualizada!");
       } else {
-        // Modo Criação
-        const newTask = await taskService.createTask({ title, description, status: 'pending' });
+        const newTask = await taskService.createTask({ title, description, status });
         setTasks(prev => [newTask, ...prev]);
-        showToast("Tarefa criada com sucesso!");
+        showToast("Tarefa criada!");
       }
     } catch (err: any) {
       showToast(err.message, 'error');
@@ -69,34 +67,34 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '', setGlobalS
     }
   };
 
-  const handleToggleTask = async (id: string) => {
+  const handleMoveTask = async (id: string, newStatus: TaskStatus) => {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
     
-    const newStatus = task.status === 'completed' ? 'pending' : 'completed';
-    
+    const oldStatus = task.status;
     setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
+    
     if (selectedTask?.id === id) {
       setSelectedTask(prev => prev ? { ...prev, status: newStatus } : null);
     }
 
     try {
       await taskService.updateTask(id, { status: newStatus });
-      showToast(`Tarefa marcada como ${newStatus === 'completed' ? 'concluída' : 'pendente'}`);
+      showToast(`Movido para ${newStatus}`);
     } catch (err: any) {
-      setTasks(prev => prev.map(t => t.id === id ? { ...t, status: task.status } : t));
+      setTasks(prev => prev.map(t => t.id === id ? { ...t, status: oldStatus } : t));
       showToast(err.message, 'error');
     }
   };
 
   const handleDeleteTask = async (id: string) => {
-    if (!window.confirm("Tem certeza que deseja excluir esta tarefa?")) return;
+    if (!window.confirm("Excluir esta tarefa?")) return;
 
     try {
       await taskService.deleteTask(id);
       setTasks(prev => prev.filter(t => t.id !== id));
       setSelectedTask(null);
-      showToast("Tarefa excluída com sucesso!");
+      showToast("Tarefa excluída!");
     } catch (err: any) {
       showToast(err.message, 'error');
     }
@@ -107,28 +105,34 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '', setGlobalS
     setIsFormOpen(true);
   };
 
-  // Filtragem unificada
+  const handleAddTaskByColumn = (status: TaskStatus) => {
+    setDefaultStatus(status);
+    setTaskToEdit(null);
+    setIsFormOpen(true);
+  };
+
   const filteredTasks = useMemo(() => {
     return tasks.filter(task => {
-      const matchesFilter = filter === 'all' || task.status === filter;
       const matchesSearch = task.title.toLowerCase().includes(globalSearchTerm.toLowerCase()) || 
                            task.description.toLowerCase().includes(globalSearchTerm.toLowerCase());
-      return matchesFilter && matchesSearch;
+      return matchesSearch;
     });
-  }, [tasks, filter, globalSearchTerm]);
+  }, [tasks, globalSearchTerm]);
 
   return (
-    <div className="space-y-6 lg:space-y-8 animate-in fade-in duration-500 pb-10">
+    <div className="h-full flex flex-col space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl lg:text-3xl font-bold glow-purple tracking-tight">Minhas Tarefas</h2>
-          <p className="text-gray-400 mt-1 flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
-            {filteredTasks.length} {filteredTasks.length === 1 ? 'tarefa encontrada' : 'tarefas encontradas'}
+          <div className="flex items-center gap-2 mb-1">
+            <Layout className="text-primary-light" size={24} />
+            <h2 className="text-2xl lg:text-3xl font-bold glow-purple tracking-tight">Quadro Kanban</h2>
+          </div>
+          <p className="text-gray-400 text-sm flex items-center gap-2">
+            Gerencie seu fluxo de trabalho de forma visual
           </p>
         </div>
         <button
-          onClick={() => { setTaskToEdit(null); setIsFormOpen(true); }}
+          onClick={() => handleAddTaskByColumn('todo')}
           className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto px-6 shadow-glow"
         >
           <Plus size={20} />
@@ -136,77 +140,47 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '', setGlobalS
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Barra de Pesquisa Local */}
-        <div className="lg:col-span-2 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-          <input
-            type="text"
-            placeholder="Buscar por título ou descrição..."
-            value={globalSearchTerm}
-            onChange={(e) => setGlobalSearchTerm?.(e.target.value)}
-            className="w-full bg-surface/30 border border-white/5 rounded-2xl py-3.5 pl-12 pr-4 text-sm focus:border-primary/50 outline-none transition-all backdrop-blur-sm"
-          />
-        </div>
-
-        {/* Filtros de Status */}
-        <div className="flex items-center gap-1 bg-surface/30 p-1 rounded-2xl border border-white/5 backdrop-blur-sm">
-          {(['all', 'pending', 'completed'] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`flex-1 whitespace-nowrap py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
-                filter === f 
-                  ? 'bg-primary text-white shadow-glow border border-primary/20' 
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              {f === 'all' ? 'Todas' : f === 'pending' ? 'Pendentes' : 'Concluídas'}
-            </button>
-          ))}
-        </div>
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+        <input
+          type="text"
+          placeholder="Buscar no quadro..."
+          value={globalSearchTerm}
+          onChange={(e) => setGlobalSearchTerm?.(e.target.value)}
+          className="w-full bg-surface/30 border border-white/5 rounded-2xl py-3.5 pl-12 pr-4 text-sm focus:border-primary/50 outline-none transition-all backdrop-blur-sm"
+        />
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map(i => <SkeletonTask key={i} />)}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="space-y-4">
+              <div className="h-10 bg-white/5 rounded-xl animate-pulse"></div>
+              <SkeletonTask />
+              <SkeletonTask />
+            </div>
+          ))}
         </div>
       ) : error ? (
         <div className="flex flex-col items-center justify-center py-20 glass-card border-red-500/20 bg-red-500/5">
           <AlertCircle className="text-red-500 mb-4" size={48} />
-          <h3 className="text-xl font-bold text-white mb-2">Falha na Sincronização</h3>
+          <h3 className="text-xl font-bold text-white mb-2">Erro de Conexão</h3>
           <p className="text-gray-400 mb-6 max-w-xs text-center">{error}</p>
           <button onClick={fetchTasks} className="btn-primary flex items-center gap-2">
-            <RefreshCw size={18} /> Reestabelecer Conexão
+            <RefreshCw size={18} /> Tentar Novamente
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          <AnimatePresence mode="popLayout">
-            {filteredTasks.map((task) => (
-              <div key={task.id} onClick={() => setSelectedTask(task)} className="cursor-pointer">
-                <TaskCard
-                  task={task}
-                  onToggle={handleToggleTask}
-                  onDelete={handleDeleteTask}
-                />
-              </div>
-            ))}
-          </AnimatePresence>
-          
-          {filteredTasks.length === 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="col-span-full py-24 text-center glass-card border-dashed border-white/10">
-              <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-white/5 text-gray-600 mb-4">
-                <Search size={32} />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-400">Nenhum resultado</h3>
-              <p className="text-gray-500 mt-2">Nenhuma tarefa corresponde aos seus critérios atuais.</p>
-            </motion.div>
-          )}
-        </div>
+        <KanbanBoard
+          tasks={filteredTasks}
+          onAddTask={handleAddTaskByColumn}
+          onDeleteTask={handleDeleteTask}
+          onMoveTask={handleMoveTask}
+          onSelectTask={setSelectedTask}
+        />
       )}
 
-      {/* Modal de Detalhes da Tarefa */}
+      {/* Modal de Detalhes */}
       <Modal isOpen={!!selectedTask} onClose={() => setSelectedTask(null)} title="Detalhes da Tarefa">
         {selectedTask && (
           <div className="space-y-6">
@@ -216,46 +190,42 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '', setGlobalS
                   <FileText size={20} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Título</h4>
+                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Título</h4>
                   <p className="text-white text-lg font-semibold">{selectedTask.title}</p>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Descrição</h4>
-                <div className="max-h-[200px] overflow-y-auto overflow-x-hidden bg-white/5 rounded-xl border border-white/5">
-                  <p className="text-gray-300 leading-relaxed p-4 whitespace-pre-wrap break-words">
-                    {selectedTask.description || "Esta tarefa não possui uma descrição detalhada."}
+                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Descrição</h4>
+                <div className="max-h-[200px] overflow-y-auto bg-white/5 rounded-xl border border-white/5">
+                  <p className="text-gray-300 text-sm leading-relaxed p-4 whitespace-pre-wrap">
+                    {selectedTask.description || "Sem descrição."}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <div className="flex items-center gap-2 text-xs text-gray-500 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                <div className="flex items-center gap-2 text-[10px] text-gray-500">
                   <Calendar size={14} />
                   Criada em {new Date(selectedTask.createdAt).toLocaleDateString()}
                 </div>
-                <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase border tracking-tighter ${
-                  selectedTask.status === 'completed' ? 'border-green-500/20 text-green-500 bg-green-500/5' : 'border-primary/20 text-primary-light bg-primary/5'
+                <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase border tracking-widest ${
+                  selectedTask.status === 'done' ? 'border-green-500/20 text-green-500 bg-green-500/5' : 
+                  selectedTask.status === 'in-progress' ? 'border-blue-500/20 text-blue-400 bg-blue-500/5' :
+                  'border-primary/20 text-primary-light bg-primary/5'
                 }`}>
-                  {selectedTask.status === 'completed' ? 'Concluída' : 'Em Aberto'}
+                  {selectedTask.status === 'todo' ? 'A Fazer' : selectedTask.status === 'in-progress' ? 'Em Curso' : 'Concluído'}
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 pt-4 border-t border-white/5">
-              <button onClick={() => handleToggleTask(selectedTask.id)} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-2xl font-bold text-[10px] transition-all ${
-                selectedTask.status === 'completed' ? 'bg-white/5 text-gray-400 hover:bg-white/10' : 'bg-primary/20 text-primary-light border border-primary/30 hover:bg-primary/30'
-              }`}>
-                <CheckCircle2 size={18} />
-                {selectedTask.status === 'completed' ? 'Reabrir' : 'Concluir'}
-              </button>
-              <button onClick={() => handleOpenEdit(selectedTask)} className="flex flex-col items-center justify-center gap-1 py-3 rounded-2xl font-bold text-[10px] bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10 transition-all">
-                <Edit3 size={18} />
+            <div className="grid grid-cols-2 gap-3">
+              <button onClick={() => handleOpenEdit(selectedTask)} className="flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-xs bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10 transition-all">
+                <Edit3 size={16} />
                 Editar
               </button>
-              <button onClick={() => handleDeleteTask(selectedTask.id)} className="flex flex-col items-center justify-center gap-1 py-3 rounded-2xl font-bold text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all">
-                <Trash2 size={18} />
+              <button onClick={() => handleDeleteTask(selectedTask.id)} className="flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-xs bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all">
+                <Trash2 size={16} />
                 Excluir
               </button>
             </div>
@@ -268,6 +238,7 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '', setGlobalS
         onClose={() => { setIsFormOpen(false); setTaskToEdit(null); }}
         onSubmit={handleSubmitTask}
         initialData={taskToEdit}
+        defaultStatus={defaultStatus}
       />
 
       <Toast {...toast} onClose={() => setToast(prev => ({ ...prev, isVisible: false }))} />

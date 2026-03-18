@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { LayoutDashboard, CheckSquare, LogOut, Code, Menu, X, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Layout, LogOut, Code, Menu, X, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { authService } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,7 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const menuItems = useMemo(() => [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-    { icon: CheckSquare, label: 'Minhas Tarefas', path: '/tasks' },
+    { icon: Layout, label: 'Meu Quadro', path: '/tasks' },
   ], []);
 
   const NavContent = () => (

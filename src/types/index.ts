@@ -1,4 +1,4 @@
-export type TaskStatus = 'pending' | 'completed';
+export type TaskStatus = 'todo' | 'in-progress' | 'done';
 
 export interface Task {
   id: string;
@@ -17,7 +17,7 @@ export interface User {
 
 export interface DashboardStats {
   total: number;
-  completed: number;
-  pending: number;
-  completionRate: number;
+  todo: number;
+  inProgress: number;
+  done: number;
 }

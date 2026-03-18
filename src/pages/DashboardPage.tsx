@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { taskService } from '../services/api';
 import { Task, DashboardStats } from '../types';
 import StatsCard from '../components/StatsCard';
-import { CheckCircle2, Clock, ListChecks, TrendingUp, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Clock, ListChecks, TrendingUp, AlertCircle, PlayCircle } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -26,7 +26,7 @@ ChartJS.register(
 );
 
 const DashboardPage = () => {
-  const [stats, setStats] = useState<DashboardStats>({ total: 0, completed: 0, pending: 0, completionRate: 0 });
+  const [stats, setStats] = useState<DashboardStats>({ total: 0, todo: 0, inProgress: 0, done: 0 });
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,14 +37,16 @@ const DashboardPage = () => {
     try {
       const data = await taskService.getTasks();
       setTasks(data);
-      const completed = data.filter(t => t.status === 'completed').length;
+      const todo = data.filter(t => t.status === 'todo').length;
+      const inProgress = data.filter(t => t.status === 'in-progress').length;
+      const done = data.filter(t => t.status === 'done').length;
       const total = data.length;
       
       setStats({
         total,
-        completed,
-        pending: total - completed,
-        completionRate: total > 0 ? Math.round((completed / total) * 100) : 0
+        todo,
+        inProgress,
+        done
       });
     } catch (err: any) {
       setError(err.message);
@@ -57,17 +59,17 @@ const DashboardPage = () => {
     fetchData();
   }, []);
 
-  const weeklyData = useMemo(() => {
-    const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
-    const counts = new Array(7).fill(0);
+  const completionRate = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
 
+  const weeklyData = useMemo(() => {
+    const counts = new Array(7).fill(0);
     const today = new Date();
     const firstDayOfWeek = new Date(today);
     firstDayOfWeek.setDate(today.getDate() - today.getDay());
     firstDayOfWeek.setHours(0, 0, 0, 0);
 
     tasks.forEach(task => {
-      if (task.status === 'completed') {
+      if (task.status === 'done') {
         const date = new Date(task.createdAt);
         if (date >= firstDayOfWeek) {
           counts[date.getDay()]++;
@@ -83,12 +85,12 @@ const DashboardPage = () => {
 
 
   const doughnutData = {
-    labels: ['Concluídas', 'Pendentes'],
+    labels: ['Concluídas', 'Em Curso', 'A Fazer'],
     datasets: [
       {
-        data: [stats.completed, stats.pending],
-        backgroundColor: ['rgba(168, 85, 247, 0.8)', 'rgba(168, 85, 247, 0.1)'],
-        borderColor: ['rgba(168, 85, 247, 1)', 'rgba(255, 255, 255, 0.05)'],
+        data: [stats.done, stats.inProgress, stats.todo],
+        backgroundColor: ['rgba(34, 197, 94, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(168, 85, 247, 0.8)'],
+        borderColor: ['rgba(34, 197, 94, 1)', 'rgba(59, 130, 246, 1)', 'rgba(168, 85, 247, 1)'],
         borderWidth: 1,
         hoverOffset: 10,
       },
@@ -145,31 +147,38 @@ const DashboardPage = () => {
         </div>
         <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-2 rounded-2xl">
           <TrendingUp className="text-primary-light" size={18} />
-          <span className="text-sm font-semibold text-primary-light">{stats.completionRate}% Concluído</span>
+          <span className="text-sm font-semibold text-primary-light">{completionRate}% Concluído</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <StatsCard
-          label="Total de Tarefas"
+          label="Total"
           value={stats.total}
           icon={ListChecks}
-          color="bg-primary"
+          color="bg-gray-500"
           delay={0.1}
         />
         <StatsCard
-          label="Concluídas"
-          value={stats.completed}
-          icon={CheckCircle2}
-          color="bg-green-500"
+          label="A Fazer"
+          value={stats.todo}
+          icon={Clock}
+          color="bg-primary"
           delay={0.2}
         />
         <StatsCard
-          label="Pendentes"
-          value={stats.pending}
-          icon={Clock}
-          color="bg-yellow-500"
+          label="Em Curso"
+          value={stats.inProgress}
+          icon={PlayCircle}
+          color="bg-blue-500"
           delay={0.3}
+        />
+        <StatsCard
+          label="Concluídas"
+          value={stats.done}
+          icon={CheckCircle2}
+          color="bg-green-500"
+          delay={0.4}
         />
       </div>
 
@@ -178,7 +187,7 @@ const DashboardPage = () => {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="font-semibold text-lg">Histórico Semanal</h3>
-              <p className="text-xs text-gray-500 mt-1">Comparação de tarefas concluídas por dia</p>
+              <p className="text-xs text-gray-500 mt-1">Tarefas concluídas por dia</p>
             </div>
           </div>
           <div className="h-[250px] lg:h-[300px]">
@@ -188,7 +197,7 @@ const DashboardPage = () => {
 
         <div className="glass-card p-6 lg:p-8">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="font-semibold text-lg text-center w-full">Distribuição</h3>
+            <h3 className="font-semibold text-lg text-center w-full">Distribuição de Status</h3>
           </div>
           <div className="h-[200px] lg:h-[250px] flex items-center justify-center relative">
             <Doughnut data={doughnutData} options={{ 
@@ -199,28 +208,24 @@ const DashboardPage = () => {
                 legend: { display: false },
                 tooltip: { enabled: true }
               },
-              scales: {
-                x: { display: false },
-                y: { display: false }
-              }
             }} />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold font-mono text-white">{stats.completionRate}%</span>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-3xl font-bold font-mono text-white">{completionRate}%</span>
               <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Taxa</span>
             </div>
           </div>
-          <div className="mt-8 space-y-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="flex items-center gap-2 text-gray-400">
-                <span className="h-2 w-2 rounded-full bg-primary"></span> Concluídas
-              </span>
-              <span className="text-white font-mono font-bold">{stats.completed}</span>
+          <div className="mt-8 grid grid-cols-3 gap-2">
+            <div className="flex flex-col items-center p-2 bg-white/5 rounded-xl border border-white/5">
+              <span className="text-[10px] text-gray-500 uppercase font-bold">A Fazer</span>
+              <span className="text-white font-mono font-bold">{stats.todo}</span>
             </div>
-            <div className="flex items-center justify-between text-xs">
-              <span className="flex items-center gap-2 text-gray-400">
-                <span className="h-2 w-2 rounded-full bg-white/10"></span> Pendentes
-              </span>
-              <span className="text-white font-mono font-bold">{stats.pending}</span>
+            <div className="flex flex-col items-center p-2 bg-white/5 rounded-xl border border-white/5">
+              <span className="text-[10px] text-gray-500 uppercase font-bold">Em Curso</span>
+              <span className="text-white font-mono font-bold">{stats.inProgress}</span>
+            </div>
+            <div className="flex flex-col items-center p-2 bg-white/5 rounded-xl border border-white/5">
+              <span className="text-[10px] text-gray-500 uppercase font-bold">Concluído</span>
+              <span className="text-white font-mono font-bold">{stats.done}</span>
             </div>
           </div>
         </div>

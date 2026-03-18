@@ -10,10 +10,20 @@ export const taskService = {
     try {
       await delay(400); // Reduzido de 1200
       const data = localStorage.getItem(STORAGE_KEY);
+      let tasks: any[] = data ? JSON.parse(data) : [];
       
-      // if (Math.random() > 0.95) throw new Error("Falha ao carregar dados do servidor");
+      // Migração simples para novos status se necessário
+      const migratedTasks = tasks.map(t => {
+        if (t.status === 'pending') return { ...t, status: 'todo' };
+        if (t.status === 'completed') return { ...t, status: 'done' };
+        return t;
+      });
 
-      return data ? JSON.parse(data) : [];
+      if (JSON.stringify(tasks) !== JSON.stringify(migratedTasks)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migratedTasks));
+      }
+
+      return migratedTasks;
     } catch (error) {
       console.error("Erro na API getTasks:", error);
       throw new Error("Não foi possível carregar as tarefas. Tente novamente.");

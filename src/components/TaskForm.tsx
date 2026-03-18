@@ -1,36 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Save } from 'lucide-react';
 import Modal from './Modal';
-import { Task } from '../types';
+import { Task, TaskStatus } from '../types';
 
 interface TaskFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (title: string, description: string) => void;
+  onSubmit: (title: string, description: string, status: TaskStatus) => void;
   initialData?: Task | null;
+  defaultStatus?: TaskStatus;
 }
 
-const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
+const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, initialData, defaultStatus = 'todo' }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [status, setStatus] = useState<TaskStatus>('todo');
 
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title);
       setDescription(initialData.description);
+      setStatus(initialData.status);
     } else {
       setTitle('');
       setDescription('');
+      setStatus(defaultStatus);
     }
-  }, [initialData, isOpen]);
+  }, [initialData, isOpen, defaultStatus]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    onSubmit(title, description);
+    onSubmit(title, description, status);
     if (!initialData) {
       setTitle('');
       setDescription('');
+      setStatus('todo');
     }
     onClose();
   };
@@ -63,6 +68,26 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, initialD
             rows={4}
             className="input-field w-full resize-none p-4 min-h-[120px]"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-400 mb-2 uppercase tracking-widest text-[10px]">Status</label>
+          <div className="grid grid-cols-3 gap-2">
+            {(['todo', 'in-progress', 'done'] as const).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setStatus(s)}
+                className={`py-2.5 rounded-xl text-[10px] font-bold uppercase transition-all border ${
+                  status === s 
+                    ? 'bg-primary border-primary text-white shadow-glow' 
+                    : 'bg-white/5 border-white/5 text-gray-500 hover:bg-white/10'
+                }`}
+              >
+                {s === 'todo' ? 'A fazer' : s === 'in-progress' ? 'Em curso' : 'Concluído'}
+              </button>
+            ))}
+          </div>
         </div>
         
         <div className="pt-2">
