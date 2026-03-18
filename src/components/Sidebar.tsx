@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { LayoutDashboard, CheckSquare, LogOut, Code, Menu, X, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { authService } from '../services/api';
@@ -23,10 +23,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   const location = useLocation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const menuItems = [
+  const menuItems = useMemo(() => [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: CheckSquare, label: 'Minhas Tarefas', path: '/tasks' },
-  ];
+  ], []);
 
   const NavContent = () => (
     <div className="flex h-full flex-col p-4">
@@ -94,11 +94,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         })}
       </nav>
 
-      {/* Logout e Colapso (Desktop) */}
-      <div className="mt-auto space-y-2">
+      {/* Logout e Colapso (Desktop) lado a lado */}
+      <div className="mt-auto flex items-center gap-2">
         <button
           onClick={() => authService.logout()}
-          className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-gray-400 transition-all hover:bg-red-500/10 hover:text-red-400 group ${isCollapsed && !isMobileOpen ? 'justify-center px-0' : ''}`}
+          className={`flex-1 flex items-center gap-3 rounded-xl px-4 py-3 text-gray-400 transition-all hover:bg-red-500/10 hover:text-red-400 group ${isCollapsed && !isMobileOpen ? 'justify-center px-0' : ''}`}
+          title="Sair"
         >
           <LogOut size={20} />
           {(!isCollapsed || isMobileOpen) && <span className="font-medium text-sm">Sair</span>}
@@ -106,7 +107,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden lg:flex w-full items-center gap-3 rounded-xl px-4 py-3 text-gray-500 hover:text-white hover:bg-white/5 transition-all justify-start"
+          className={`hidden lg:flex items-center justify-center rounded-xl p-3 text-gray-500 hover:text-white hover:bg-white/5 transition-all ${isCollapsed ? 'w-full' : ''}`}
+          title={isCollapsed ? "Expandir" : "Recolher"}
         >
           {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
