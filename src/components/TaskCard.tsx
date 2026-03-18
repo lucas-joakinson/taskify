@@ -1,6 +1,6 @@
 import React from 'react';
 import { Task } from '../types';
-import { Trash2, CheckCircle2, Clock, Calendar } from 'lucide-react';
+import { Trash2, CheckCircle2, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface TaskCardProps {
@@ -19,7 +19,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete }) => {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -4, scale: 1.02 }}
-      className={`glass-card p-5 group relative overflow-hidden transition-all duration-500 ${
+      className={`glass-card p-5 group relative overflow-hidden transition-all duration-500 cursor-pointer ${
         isCompleted 
           ? 'border-primary/5 bg-surface/10 opacity-60' 
           : 'hover:border-primary/40 hover:shadow-glow hover:bg-surface/40'
@@ -63,7 +63,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete }) => {
 
         <div className="flex flex-col gap-2 ml-4 shrink-0">
           <button
-            onClick={() => onToggle(task.id)}
+            onClick={(e) => {
+              e.stopPropagation(); // Impede abertura do modal
+              onToggle(task.id);
+            }}
             className={`p-2.5 rounded-xl transition-all duration-300 ${
               isCompleted 
                 ? 'bg-green-500 text-white shadow-glow-sm' 
@@ -74,7 +77,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete }) => {
             <CheckCircle2 size={18} />
           </button>
           <button
-            onClick={() => onDelete(task.id)}
+            onClick={(e) => {
+              e.stopPropagation(); // Impede abertura do modal
+              onDelete(task.id);
+            }}
             className="p-2.5 rounded-xl bg-surface border border-white/5 text-gray-500 hover:text-red-400 hover:border-red-500/50 transition-all duration-300"
             title="Excluir"
           >
@@ -83,7 +89,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onDelete }) => {
         </div>
       </div>
       
-      {/* Barra de progresso visual na base do card se estiver pendente */}
       {!isCompleted && (
         <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-gradient-to-r from-primary to-accent group-hover:w-full transition-all duration-700"></div>
       )}

@@ -8,14 +8,20 @@ import LoginPage from './pages/LoginPage';
 import { authService } from './services/api';
 import { User } from './types';
 
-// Componente para proteger rotas
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const user = authService.getCurrentUser();
   return user ? <>{children}</> : <Navigate to="/login" />;
 };
 
-// Layout principal do Dashboard
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+const DashboardLayout = ({ 
+  children, 
+  searchTerm, 
+  setSearchTerm 
+}: { 
+  children: React.ReactNode;
+  searchTerm: string;
+  setSearchTerm: (val: string) => void;
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const location = useLocation();
 
@@ -24,13 +30,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   }, [location]);
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex flex-col lg:flex-row">
       <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header user={user} />
-        {/* ml-0 para mobile e ml-64 para desktop (espaço da sidebar fixa) */}
-        <main className="lg:ml-64 pt-20 p-4 lg:p-8 min-h-screen overflow-x-hidden">
-          <div className="max-w-7xl mx-auto">
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header fixo com largura controlada */}
+        <Header user={user} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        
+        {/* Main com padding-top para compensar o header fixo (h-20 = 80px) */}
+        <main className="flex-1 pt-20 lg:ml-64 p-4 lg:p-8 overflow-y-auto">
+          <div className="max-w-7xl mx-auto w-full">
             {children}
           </div>
         </main>
@@ -40,18 +48,18 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
+  const [searchTerm, setSearchTerm] = useState('');
+
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rota Pública */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Rotas Privadas */}
         <Route
           path="/"
           element={
             <PrivateRoute>
-              <DashboardLayout>
+              <DashboardLayout searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
                 <DashboardPage />
               </DashboardLayout>
             </PrivateRoute>
@@ -61,14 +69,13 @@ function App() {
           path="/tasks"
           element={
             <PrivateRoute>
-              <DashboardLayout>
-                <TasksPage />
+              <DashboardLayout searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
+                <TasksPage globalSearchTerm={searchTerm} />
               </DashboardLayout>
             </PrivateRoute>
           }
         />
 
-        {/* Redirecionamento padrão */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

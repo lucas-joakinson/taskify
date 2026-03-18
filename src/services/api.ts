@@ -8,7 +8,7 @@ export const taskService = {
   // Simula GET /tasks
   async getTasks(): Promise<Task[]> {
     try {
-      await delay(1200);
+      await delay(400); // Reduzido de 1200
       const data = localStorage.getItem(STORAGE_KEY);
       
       // if (Math.random() > 0.95) throw new Error("Falha ao carregar dados do servidor");
@@ -23,7 +23,7 @@ export const taskService = {
   // Simula POST /tasks
   async createTask(taskData: Omit<Task, 'id' | 'createdAt'>): Promise<Task> {
     try {
-      await delay(800);
+      await delay(300); // Reduzido de 800
       const tasks = await this.getTasks();
       
       const newTask: Task = {
@@ -44,7 +44,7 @@ export const taskService = {
   // Simula PATCH /tasks/:id
   async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
     try {
-      await delay(500);
+      await delay(200); // Reduzido de 500
       const tasks = await this.getTasks();
       const index = tasks.findIndex(t => t.id === id);
       
@@ -64,7 +64,7 @@ export const taskService = {
   // Simula DELETE /tasks/:id
   async deleteTask(id: string): Promise<void> {
     try {
-      await delay(600);
+      await delay(200); // Reduzido de 600
       const tasks = await this.getTasks();
       const filteredTasks = tasks.filter(t => t.id !== id);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredTasks));
@@ -77,7 +77,7 @@ export const taskService = {
 
 export const authService = {
   async login(email: string): Promise<User> {
-    await delay(1000);
+    await delay(400); // Reduzido de 1000
     const user: User = {
       id: 'user_1',
       name: email.split('@')[0],
