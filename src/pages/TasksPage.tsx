@@ -67,22 +67,34 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '', setGlobalS
     }
   };
 
-  const handleMoveTask = async (id: string, newStatus: TaskStatus) => {
+  const handleMoveTask = async (id: string, newStatus: TaskStatus, index?: number) => {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
     
-    const oldStatus = task.status;
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
+    const oldTasks = [...tasks];
     
-    if (selectedTask?.id === id) {
-      setSelectedTask(prev => prev ? { ...prev, status: newStatus } : null);
-    }
+    setTasks(prev => {
+      const filtered = prev.filter(t => t.id !== id);
+      const updatedTask = { ...task, status: newStatus };
+      
+      if (typeof index === 'number') {
+        // Encontrar o ponto de inserção real dentro das tarefas do mesmo status
+        const statusTasks = filtered.filter(t => t.status === newStatus);
+        const otherTasks = filtered.filter(t => t.status !== newStatus);
+        
+        const newStatusTasks = [...statusTasks];
+        newStatusTasks.splice(index, 0, updatedTask);
+        
+        return [...otherTasks, ...newStatusTasks];
+      } else {
+        return [updatedTask, ...filtered];
+      }
+    });
 
     try {
       await taskService.updateTask(id, { status: newStatus });
-      showToast(`Movido para ${newStatus}`);
     } catch (err: any) {
-      setTasks(prev => prev.map(t => t.id === id ? { ...t, status: oldStatus } : t));
+      setTasks(oldTasks);
       showToast(err.message, 'error');
     }
   };
