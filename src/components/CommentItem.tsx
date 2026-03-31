@@ -17,24 +17,26 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
   };
 
   return (
-    <div className="flex gap-3 py-3 border-b border-gray-100 last:border-0">
+    <div className="flex gap-3 py-3 border-b border-white/5 last:border-0">
       <img
         src={comment.userAvatar || `https://api.dicebear.com/7.x/initials/svg?seed=${comment.userName}`}
         alt={comment.userName}
-        className="w-8 h-8 rounded-full bg-gray-200 object-cover flex-shrink-0"
+        className="w-8 h-8 rounded-full bg-white/10 object-cover flex-shrink-0"
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-1">
-          <span className="text-sm font-semibold text-gray-900 truncate">
+          <span className="text-sm font-semibold text-white truncate">
             {comment.userName}
           </span>
-          <span className="text-xs text-gray-500 whitespace-nowrap">
+          <span className="text-[10px] text-gray-500 whitespace-nowrap uppercase tracking-widest font-medium">
             {formatDate(comment.createdAt)}
           </span>
         </div>
-        <p className="text-sm text-gray-600 break-words leading-relaxed">
-          {comment.text}
-        </p>
+        <div className="bg-white/5 rounded-xl border border-white/5 p-3 mt-1">
+          <p className="text-sm text-gray-300 break-words leading-relaxed">
+            {comment.text}
+          </p>
+        </div>
       </div>
     </div>
   );

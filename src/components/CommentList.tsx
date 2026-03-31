@@ -9,8 +9,8 @@ interface CommentListProps {
 export const CommentList: React.FC<CommentListProps> = ({ comments }) => {
   if (comments.length === 0) {
     return (
-      <div className="py-6 text-center text-sm text-gray-500">
-        Nenhum comentário ainda. Seja o primeiro a comentar!
+      <div className="py-6 text-center text-sm text-gray-500 italic">
+        Nenhum comentário ainda.
       </div>
     );
   }

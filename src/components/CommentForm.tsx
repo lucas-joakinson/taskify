@@ -23,7 +23,6 @@ export const CommentForm: React.FC<CommentFormProps> = ({ taskId, onCommentAdded
       onCommentAdded(updatedTask);
     } catch (error) {
       console.error(error);
-      // Aqui você poderia disparar um Toast de erro se desejar
     } finally {
       setIsSubmitting(false);
     }
@@ -35,7 +34,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({ taskId, onCommentAdded
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Escreva um comentário..."
-        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none min-h-[40px] max-h-[120px]"
+        className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 pr-12 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all resize-none min-h-[48px] max-h-[120px] placeholder:text-gray-500"
         rows={1}
         onInput={(e) => {
           const target = e.target as HTMLTextAreaElement;
