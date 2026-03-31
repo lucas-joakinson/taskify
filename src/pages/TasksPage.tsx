@@ -6,7 +6,9 @@ import TaskForm from '../components/TaskForm';
 import SkeletonTask from '../components/SkeletonTask';
 import Toast, { ToastType } from '../components/Toast';
 import Modal from '../components/Modal';
-import { Plus, Search, RefreshCw, AlertCircle, Trash2, Calendar, FileText, Edit3, Layout } from 'lucide-react';
+import { CommentList } from '../components/CommentList';
+import { CommentForm } from '../components/CommentForm';
+import { Plus, Search, RefreshCw, AlertCircle, Trash2, Calendar, FileText, Edit3, Layout, MessageSquare } from 'lucide-react';
 
 interface TasksPageProps {
   globalSearchTerm?: string;
@@ -115,6 +117,12 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '', setGlobalS
   const handleOpenEdit = (task: Task) => {
     setTaskToEdit(task);
     setIsFormOpen(true);
+  };
+
+  const handleCommentAdded = (updatedTask: Task) => {
+    setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+    setSelectedTask(updatedTask);
+    showToast("Comentário adicionado!");
   };
 
   const handleAddTaskByColumn = (status: TaskStatus) => {
@@ -240,6 +248,22 @@ const TasksPage: React.FC<TasksPageProps> = ({ globalSearchTerm = '', setGlobalS
                 <Trash2 size={16} />
                 Excluir
               </button>
+            </div>
+
+            <div className="pt-4 border-t border-white/5">
+              <div className="flex items-center gap-2 mb-4">
+                <MessageSquare className="text-primary-light" size={18} />
+                <h4 className="text-sm font-bold text-white">Comentários</h4>
+                <span className="bg-primary/20 text-primary-light text-[10px] px-2 py-0.5 rounded-full">
+                  {selectedTask.comments?.length || 0}
+                </span>
+              </div>
+              
+              <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                <CommentList comments={selectedTask.comments || []} />
+              </div>
+              
+              <CommentForm taskId={selectedTask.id} onCommentAdded={handleCommentAdded} />
             </div>
           </div>
         )}

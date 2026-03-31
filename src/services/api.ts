@@ -14,9 +14,11 @@ export const taskService = {
       
       // Migração simples para novos status se necessário
       const migratedTasks = tasks.map(t => {
-        if (t.status === 'pending') return { ...t, status: 'todo' };
-        if (t.status === 'completed') return { ...t, status: 'done' };
-        return t;
+        let updated = { ...t };
+        if (t.status === 'pending') updated.status = 'todo';
+        if (t.status === 'completed') updated.status = 'done';
+        if (!updated.comments) updated.comments = [];
+        return updated;
       });
 
       if (JSON.stringify(tasks) !== JSON.stringify(migratedTasks)) {
@@ -31,7 +33,7 @@ export const taskService = {
   },
 
   // Simula POST /tasks
-  async createTask(taskData: Omit<Task, 'id' | 'createdAt'>): Promise<Task> {
+  async createTask(taskData: Omit<Task, 'id' | 'createdAt' | 'comments'>): Promise<Task> {
     try {
       await delay(300);
       const tasks = await this.getTasks();
@@ -40,6 +42,7 @@ export const taskService = {
         ...taskData,
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
+        comments: []
       };
 
       const updatedTasks = [newTask, ...tasks];
@@ -81,6 +84,34 @@ export const taskService = {
     } catch (error) {
       console.error("Erro na API deleteTask:", error);
       throw new Error("Erro ao deletar tarefa.");
+    }
+  },
+
+  async addComment(taskId: string, text: string): Promise<Task> {
+    try {
+      await delay(200);
+      const user = authService.getCurrentUser();
+      if (!user) throw new Error("Usuário não autenticado.");
+
+      const tasks = await this.getTasks();
+      const taskIndex = tasks.findIndex(t => t.id === taskId);
+      if (taskIndex === -1) throw new Error("Tarefa não encontrada.");
+
+      const newComment = {
+        id: crypto.randomUUID(),
+        userId: user.id,
+        userName: user.name,
+        userAvatar: user.avatar,
+        text,
+        createdAt: new Date().toISOString()
+      };
+
+      tasks[taskIndex].comments.push(newComment);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      return tasks[taskIndex];
+    } catch (error) {
+      console.error("Erro na API addComment:", error);
+      throw new Error("Erro ao adicionar comentário.");
     }
   }
 };
