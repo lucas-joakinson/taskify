@@ -97,17 +97,17 @@ const Column: React.FC<ColumnProps> = ({
   return (
     <div 
       className={`flex flex-col w-full min-w-[300px] max-w-[350px] h-full rounded-2xl border transition-colors duration-300 backdrop-blur-sm overflow-hidden ${
-        active ? 'bg-primary/5 border-primary/30 shadow-glow-sm' : 'bg-surface/10 border-white/5'
+        active ? 'bg-primary/5 border-primary/30 shadow-glow-sm' : 'bg-surface/40 border-border/10'
       }`}
     >
-      <div className="p-4 flex items-center justify-between border-b border-white/5 bg-white/5">
+      <div className="p-4 flex items-center justify-between border-b border-border/10 bg-input">
         <div className="flex items-center gap-2">
-          <h3 className="font-bold text-sm text-white uppercase tracking-wider">{title}</h3>
-          <span className="px-2 py-0.5 rounded-full bg-white/5 text-[10px] font-bold text-gray-400 border border-white/5">
+          <h3 className="font-bold text-sm text-foreground uppercase tracking-wider">{title}</h3>
+          <span className="px-2 py-0.5 rounded-full bg-surface text-[10px] font-bold text-slate-500 border border-border">
             {tasks.length}
           </span>
         </div>
-        <button className="p-1 text-gray-500 hover:text-white transition-colors">
+        <button className="p-1 text-slate-500 hover:text-foreground transition-colors">
           <MoreHorizontal size={18} />
         </button>
       </div>
@@ -135,14 +135,14 @@ const Column: React.FC<ColumnProps> = ({
         <DropIndicator beforeId={null} status={status} />
 
         {tasks.length === 0 && !active && (
-          <div className="py-10 flex flex-col items-center justify-center text-center opacity-50 border-2 border-dashed border-white/5 rounded-2xl">
-            <p className="text-xs text-gray-500 font-medium">Sem tarefas</p>
+          <div className="py-10 flex flex-col items-center justify-center text-center opacity-50 border-2 border-dashed border-border rounded-2xl">
+            <p className="text-xs text-slate-500 font-medium">Sem tarefas</p>
           </div>
         )}
 
         <button
           onClick={() => onAddTask(status)}
-          className="w-full mt-4 py-3 flex items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 text-gray-500 hover:text-primary-light hover:border-primary/30 hover:bg-primary/5 transition-all group"
+          className="w-full mt-4 py-3 flex items-center justify-center gap-2 rounded-xl border border-dashed border-border text-slate-500 hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all group"
         >
           <Plus size={16} className="group-hover:scale-110 transition-transform" />
           <span className="text-xs font-bold uppercase tracking-tighter">Adicionar tarefa</span>

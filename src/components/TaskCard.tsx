@@ -43,11 +43,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete, onMove, onClick }) 
         draggable
         onDragStart={handleDragStart}
         onClick={onClick}
-        className="glass-card p-4 group relative overflow-hidden transition-all duration-300 cursor-grab active:cursor-grabbing border-white/5 hover:border-primary/40 hover:shadow-glow bg-surface/20"
+        className="glass-card p-4 group relative overflow-hidden transition-all duration-300 cursor-grab active:cursor-grabbing border-border/10 hover:border-primary/40 hover:shadow-glow bg-surface/60"
       >
         <div className="flex flex-col gap-3 relative z-10">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-bold text-sm text-white transition-all duration-300 line-clamp-2 group-hover:text-primary-light">
+            <h3 className="font-bold text-sm text-foreground transition-all duration-300 line-clamp-2 group-hover:text-primary">
               {task.title}
             </h3>
             <button
@@ -55,7 +55,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete, onMove, onClick }) 
                 e.stopPropagation();
                 onDelete(task.id);
               }}
-              className="p-1.5 rounded-lg bg-white/5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+              className="p-1.5 rounded-lg bg-input text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
               title="Excluir"
             >
               <Trash2 size={14} />
@@ -63,13 +63,13 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete, onMove, onClick }) 
           </div>
           
           {task.description && (
-            <p className="text-xs text-gray-400 line-clamp-2 group-hover:text-gray-300 transition-colors">
+            <p className="text-xs text-slate-500 line-clamp-2 group-hover:text-foreground transition-colors">
               {task.description}
             </p>
           )}
           
           <div className="flex items-center justify-between mt-1">
-            <div className="flex items-center gap-1.5 text-[10px] text-gray-500">
+            <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
               <Calendar size={12} />
               {new Date(task.createdAt).toLocaleDateString()}
             </div>
@@ -81,7 +81,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete, onMove, onClick }) 
                     e.stopPropagation();
                     onMove(task.id, prevStatus);
                   }}
-                  className="p-1 rounded-md bg-white/5 text-gray-400 hover:text-primary-light hover:bg-primary/10 transition-all"
+                  className="p-1 rounded-md bg-input text-slate-500 hover:text-primary hover:bg-primary/10 transition-all"
                   title={`Mover para ${prevStatus}`}
                 >
                   <ChevronLeft size={14} />
@@ -93,7 +93,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete, onMove, onClick }) 
                     e.stopPropagation();
                     onMove(task.id, nextStatus);
                   }}
-                  className="p-1 rounded-md bg-white/5 text-gray-400 hover:text-primary-light hover:bg-primary/10 transition-all"
+                  className="p-1 rounded-md bg-input text-slate-500 hover:text-primary hover:bg-primary/10 transition-all"
                   title={`Mover para ${nextStatus}`}
                 >
                   <ChevronRight size={14} />

@@ -3,6 +3,7 @@ import { taskService } from '../services/api';
 import { Task, DashboardStats } from '../types';
 import StatsCard from '../components/StatsCard';
 import { CheckCircle2, Clock, ListChecks, TrendingUp, AlertCircle, PlayCircle } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -30,6 +31,7 @@ const DashboardPage = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { theme } = useTheme();
 
   const fetchData = async () => {
     setLoading(true);
@@ -90,7 +92,7 @@ const DashboardPage = () => {
       {
         data: [stats.done, stats.inProgress, stats.todo],
         backgroundColor: ['rgba(34, 197, 94, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(168, 85, 247, 0.8)'],
-        borderColor: ['rgba(34, 197, 94, 1)', 'rgba(59, 130, 246, 1)', 'rgba(168, 85, 247, 1)'],
+        borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
         borderWidth: 1,
         hoverOffset: 10,
       },
@@ -117,23 +119,29 @@ const DashboardPage = () => {
       legend: { display: false },
     },
     scales: {
-      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6b7280', font: { size: 10 } } },
-      x: { grid: { display: false }, ticks: { color: '#6b7280', font: { size: 10 } } },
+      y: { 
+        grid: { color: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }, 
+        ticks: { color: '#6b7280', font: { size: 10 } } 
+      },
+      x: { 
+        grid: { display: false }, 
+        ticks: { color: '#6b7280', font: { size: 10 } } 
+      },
     },
   };
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center h-[calc(100vh-120px)] gap-4">
       <div className="h-12 w-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin shadow-glow"></div>
-      <p className="text-gray-500 animate-pulse font-medium">Sincronizando dados...</p>
+      <p className="text-slate-500 animate-pulse font-medium">Sincronizando dados...</p>
     </div>
   );
 
   if (error) return (
     <div className="flex flex-col items-center justify-center h-[calc(100vh-120px)] text-center p-6">
       <AlertCircle className="text-red-500 mb-4" size={48} />
-      <h3 className="text-xl font-bold text-white mb-2">Falha ao carregar métricas</h3>
-      <p className="text-gray-400 max-w-xs">{error}</p>
+      <h3 className="text-xl font-bold text-foreground mb-2">Falha ao carregar métricas</h3>
+      <p className="text-slate-500 max-w-xs">{error}</p>
       <button onClick={fetchData} className="btn-primary mt-6">Tentar Novamente</button>
     </div>
   );
@@ -142,12 +150,12 @@ const DashboardPage = () => {
     <div className="space-y-6 lg:space-y-8 animate-in fade-in duration-500 pb-10">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl lg:text-3xl font-bold glow-purple">Visão Geral</h2>
-          <p className="text-gray-400 mt-1">Sua produtividade em tempo real.</p>
+          <h2 className="text-2xl lg:text-3xl font-bold glow-purple text-foreground">Visão Geral</h2>
+          <p className="text-slate-500 mt-1">Sua produtividade em tempo real.</p>
         </div>
         <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-2 rounded-2xl">
-          <TrendingUp className="text-primary-light" size={18} />
-          <span className="text-sm font-semibold text-primary-light">{completionRate}% Concluído</span>
+          <TrendingUp className="text-primary" size={18} />
+          <span className="text-sm font-semibold text-primary">{completionRate}% Concluído</span>
         </div>
       </div>
 
@@ -156,7 +164,7 @@ const DashboardPage = () => {
           label="Total"
           value={stats.total}
           icon={ListChecks}
-          color="bg-gray-500"
+          color="bg-slate-500"
           delay={0.1}
         />
         <StatsCard
@@ -186,8 +194,8 @@ const DashboardPage = () => {
         <div className="glass-card p-6 lg:p-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h3 className="font-semibold text-lg">Histórico Semanal</h3>
-              <p className="text-xs text-gray-500 mt-1">Tarefas concluídas por dia</p>
+              <h3 className="font-semibold text-lg text-foreground">Histórico Semanal</h3>
+              <p className="text-xs text-slate-500 mt-1">Tarefas concluídas por dia</p>
             </div>
           </div>
           <div className="h-[250px] lg:h-[300px]">
@@ -197,7 +205,7 @@ const DashboardPage = () => {
 
         <div className="glass-card p-6 lg:p-8">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="font-semibold text-lg text-center w-full">Distribuição de Status</h3>
+            <h3 className="font-semibold text-lg text-center w-full text-foreground">Distribuição de Status</h3>
           </div>
           <div className="h-[200px] lg:h-[250px] flex items-center justify-center relative">
             <Doughnut data={doughnutData} options={{ 
@@ -210,22 +218,22 @@ const DashboardPage = () => {
               },
             }} />
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-3xl font-bold font-mono text-white">{completionRate}%</span>
-              <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Taxa</span>
+              <span className="text-3xl font-bold font-mono text-foreground">{completionRate}%</span>
+              <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Taxa</span>
             </div>
           </div>
           <div className="mt-8 grid grid-cols-3 gap-2">
-            <div className="flex flex-col items-center p-2 bg-white/5 rounded-xl border border-white/5">
-              <span className="text-[10px] text-gray-500 uppercase font-bold">A Fazer</span>
-              <span className="text-white font-mono font-bold">{stats.todo}</span>
+            <div className="flex flex-col items-center p-2 bg-input rounded-xl border border-border/10">
+              <span className="text-[10px] text-slate-500 uppercase font-bold">A Fazer</span>
+              <span className="text-foreground font-mono font-bold">{stats.todo}</span>
             </div>
-            <div className="flex flex-col items-center p-2 bg-white/5 rounded-xl border border-white/5">
-              <span className="text-[10px] text-gray-500 uppercase font-bold">Em Curso</span>
-              <span className="text-white font-mono font-bold">{stats.inProgress}</span>
+            <div className="flex flex-col items-center p-2 bg-input rounded-xl border border-border/10">
+              <span className="text-[10px] text-slate-500 uppercase font-bold">Em Curso</span>
+              <span className="text-foreground font-mono font-bold">{stats.inProgress}</span>
             </div>
-            <div className="flex flex-col items-center p-2 bg-white/5 rounded-xl border border-white/5">
-              <span className="text-[10px] text-gray-500 uppercase font-bold">Concluído</span>
-              <span className="text-white font-mono font-bold">{stats.done}</span>
+            <div className="flex flex-col items-center p-2 bg-input rounded-xl border border-border/10">
+              <span className="text-[10px] text-slate-500 uppercase font-bold">Concluído</span>
+              <span className="text-foreground font-mono font-bold">{stats.done}</span>
             </div>
           </div>
         </div>

@@ -1,22 +1,18 @@
 import React, { useState, useMemo } from 'react';
-import { LayoutDashboard, Layout, LogOut, Code, Menu, X, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Layout, Code, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { authService } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User } from '../types';
+import ThemeToggle from './ThemeToggle';
 
 interface SidebarProps {
   user: User | null;
-  searchTerm: string;
-  setSearchTerm: (val: string) => void;
   isCollapsed: boolean;
   setIsCollapsed: (val: boolean) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
   user, 
-  searchTerm, 
-  setSearchTerm,
   isCollapsed,
   setIsCollapsed 
 }) => {
@@ -30,28 +26,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const NavContent = () => (
     <div className="flex h-full flex-col p-4">
-      {/* Perfil do Usuário */}
-      <div className={`mb-8 flex items-center gap-3 p-2 rounded-2xl bg-white/5 border border-white/5 ${isCollapsed && !isMobileOpen ? 'justify-center' : ''}`}>
-        <img
-          src={user?.avatar}
-          alt="Avatar"
-          className="h-10 w-10 rounded-xl border border-primary/20 shadow-glow-sm"
-        />
-        {(!isCollapsed || isMobileOpen) && (
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-white truncate">{user?.name || 'Usuário'}</p>
-            <p className="text-[10px] text-gray-500 truncate">{user?.email}</p>
-          </div>
-        )}
-      </div>
-
       {/* Título do App */}
       <div className={`mb-8 flex items-center gap-3 px-2 ${isCollapsed && !isMobileOpen ? 'justify-center' : ''}`}>
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-glow shrink-0">
           <Code className="text-white" size={18} />
         </div>
         {(!isCollapsed || isMobileOpen) && (
-          <h1 className="text-lg font-bold glow-purple whitespace-nowrap">Taskify</h1>
+          <h1 className="text-lg font-bold glow-purple whitespace-nowrap text-foreground">Taskify</h1>
         )}
       </div>
 
@@ -68,8 +49,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => setIsMobileOpen(false)}
               className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 ${
                 isActive 
-                  ? 'bg-primary/20 text-primary-light shadow-glow-sm border border-primary/20' 
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                  ? 'bg-primary/20 text-primary shadow-glow-sm border border-primary/20' 
+                  : 'text-slate-500 hover:bg-input hover:text-foreground'
               } ${isCollapsed && !isMobileOpen ? 'justify-center px-0' : ''}`}
               title={item.label}
             >
@@ -80,24 +61,24 @@ const Sidebar: React.FC<SidebarProps> = ({
         })}
       </nav>
 
-      {/* Logout e Colapso */}
-      <div className={`mt-auto flex gap-2 ${isCollapsed && !isMobileOpen ? 'flex-col-reverse items-center' : 'items-center flex-row'}`}>
-        <button
-          onClick={() => authService.logout()}
-          className={`flex-1 flex items-center gap-3 rounded-xl px-4 py-3 text-gray-400 transition-all hover:bg-red-500/10 hover:text-red-400 group ${isCollapsed && !isMobileOpen ? 'justify-center px-0 w-full' : ''}`}
-          title="Sair"
-        >
-          <LogOut size={20} />
-          {(!isCollapsed || isMobileOpen) && <span className="font-medium text-sm">Sair</span>}
-        </button>
+      {/* Footer do Sidebar: Toggle e Colapso */}
+      <div className="mt-auto space-y-4">
+        <div className={`flex items-center gap-3 px-2 ${isCollapsed && !isMobileOpen ? 'justify-center' : 'justify-between'}`}>
+          {(!isCollapsed || isMobileOpen) && (
+            <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Tema</span>
+          )}
+          <ThemeToggle />
+        </div>
 
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`hidden lg:flex items-center justify-center rounded-xl p-3 text-gray-500 hover:text-white hover:bg-white/5 transition-all ${isCollapsed ? 'w-full' : ''}`}
-          title={isCollapsed ? "Expandir" : "Recolher"}
-        >
-          {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-        </button>
+        <div className={`flex gap-2 ${isCollapsed && !isMobileOpen ? 'flex-col items-center' : 'items-center flex-row'}`}>
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className={`flex items-center justify-center rounded-xl p-3 text-slate-500 hover:text-foreground hover:bg-input transition-all ${isCollapsed ? 'w-full' : 'flex-1 border border-border/10 bg-input'}`}
+            title={isCollapsed ? "Expandir" : "Recolher"}
+          >
+            {isCollapsed ? <ChevronRight size={20} /> : <div className="flex items-center gap-2"><ChevronLeft size={20} /><span className="text-sm font-medium">Recolher</span></div>}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -106,12 +87,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     <>
       <button 
         onClick={() => setIsMobileOpen(true)}
-        className="fixed top-6 left-6 z-[60] lg:hidden p-3 bg-surface border border-white/10 rounded-2xl text-primary-light shadow-glow-sm"
+        className="fixed top-6 left-6 z-[60] lg:hidden p-3 bg-surface border border-border/10 rounded-2xl text-primary shadow-glow-sm"
       >
         <Menu size={24} />
       </button>
 
-      <aside className={`hidden lg:block fixed left-0 top-0 h-screen border-r border-white/5 bg-surface/20 backdrop-blur-xl z-50 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
+      <aside className={`hidden lg:block fixed left-0 top-0 h-screen border-r border-border/10 bg-surface/20 backdrop-blur-xl z-50 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
         <NavContent />
       </aside>
 
@@ -130,11 +111,11 @@ const Sidebar: React.FC<SidebarProps> = ({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed left-0 top-0 h-screen w-72 bg-surface border-r border-white/10 z-[80] lg:hidden shadow-2xl"
+              className="fixed left-0 top-0 h-screen w-72 bg-surface border-r border-border/10 z-[80] lg:hidden shadow-2xl"
             >
               <button 
                 onClick={() => setIsMobileOpen(false)}
-                className="absolute top-6 right-6 p-2 text-gray-400 hover:text-white"
+                className="absolute top-6 right-6 p-2 text-slate-500 hover:text-foreground"
               >
                 <X size={24} />
               </button>

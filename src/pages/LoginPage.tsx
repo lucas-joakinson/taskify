@@ -40,17 +40,17 @@ const LoginPage = () => {
           <div className="h-16 w-16 bg-primary rounded-2xl flex items-center justify-center shadow-glow mb-6">
             <Code size={32} className="text-white" />
           </div>
-          <h1 className="text-3xl font-bold glow-purple">Bem-vindo de volta</h1>
-          <p className="text-gray-400 mt-2 text-center">
+          <h1 className="text-3xl font-bold glow-purple text-foreground">Bem-vindo de volta</h1>
+          <p className="text-slate-500 mt-2 text-center">
             Acesse seu dashboard SaaS moderno e gerencie suas tarefas.
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-400 ml-1">E-mail</label>
+            <label className="text-sm font-medium text-slate-500 ml-1">E-mail</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <input
                 type="email"
                 required
@@ -63,9 +63,9 @@ const LoginPage = () => {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-400 ml-1">Senha</label>
+            <label className="text-sm font-medium text-slate-500 ml-1">Senha</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <input
                 type="password"
                 required
@@ -93,8 +93,8 @@ const LoginPage = () => {
           </button>
         </form>
 
-        <div className="mt-8 pt-8 border-t border-white/5">
-          <button className="w-full flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 text-white rounded-xl py-2.5 transition-all">
+        <div className="mt-8 pt-8 border-t border-border">
+          <button className="w-full flex items-center justify-center gap-3 bg-input hover:bg-surface text-foreground rounded-xl py-2.5 transition-all border border-border">
             <Github size={20} />
             Continuar com GitHub
           </button>

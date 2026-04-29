@@ -45,10 +45,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
             
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold glow-purple">{title}</h2>
+              <h2 className="text-xl font-bold glow-purple text-foreground">{title}</h2>
               <button 
                 onClick={onClose} 
-                className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                className="p-2 text-slate-500 hover:text-foreground hover:bg-input rounded-lg transition-all"
               >
                 <X size={20} />
               </button>
